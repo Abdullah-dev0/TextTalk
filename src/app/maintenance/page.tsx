@@ -39,7 +39,7 @@ const Maintenance = () => {
               <a href="mailto:support@example.com" className="p-2 text-gray-600 hover:text-blue-600">
                 <Mail className="w-6 h-6" />
               </a>
-              <a href="https://github.com" className="p-2 text-gray-600 hover:text-gray-900">
+              <a href="https://github.com/abdullah-dev0" className="p-2 text-gray-600 hover:text-gray-900">
                 <Github className="w-6 h-6" />
               </a>
               <a href="https://twitter.com" className="p-2 text-gray-600 hover:text-blue-400">

@@ -1,6 +1,4 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { db } from "./db";
-import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 
 const MAINTENANCE_MODE = "true";
@@ -17,27 +15,19 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
-	// redirect theuser to maintenance page
+	if (!isPublicRoute(request)) {
+		await auth.protect();
+	}
 
-	if (MAINTENANCE_MODE === "true" && request.nextUrl.pathname !== "/maintenance") {
-		return NextResponse.redirect(new URL("/maintenance", request.url));
+	const user = await auth();
+	const url = request.nextUrl.clone();
+	url.pathname = "/dashboard";
+
+	if (user.userId && request.nextUrl.pathname === "/") {
+		return NextResponse.redirect(new URL("/dashboard", request.url));
 	}
 
 	return NextResponse.next();
-
-	// if (!isPublicRoute(request)) {
-	// 	await auth.protect();
-	// }
-
-	// const user = await auth();
-	// const url = request.nextUrl.clone();
-	// url.pathname = "/dashboard";
-
-	// if (user.userId && request.nextUrl.pathname === "/") {
-	// 	return NextResponse.redirect(new URL("/dashboard", request.url));
-	// }
-
-	// return NextResponse.next();
 });
 
 export const config = {
