@@ -47,7 +47,7 @@ const UploadDropzone = ({ dialogTriggerRef }: { dialogTriggerRef: RefObject<HTML
 					</div>
 					<h3 className="text-2xl font-semibold text-gray-800">Processing your PDF</h3>
 					<p className="text-gray-500 text-center max-w-md">
-						This may take a moment depending on the file size. Please don't close this window.
+						This may take a moment depending on the file size. Please do not close this window.
 					</p>
 				</div>
 			) : (
