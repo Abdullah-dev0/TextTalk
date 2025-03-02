@@ -2,6 +2,7 @@ import Providers from "@/components/Providers";
 import { cn, constructMetadata } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "simplebar-react/dist/simplebar.min.css";
 import "./globals.css";
 
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					<body className={cn("min-h-screen font-sans antialiased grainy", inter.className)}>
 						<Toaster duration={3000} richColors />
 						{children}
+						<Analytics />
 					</body>
 				</Providers>
 			</html>
