@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { embeddings } from "@/lib/embeddings";
 import index from "@/lib/pinecone";
+import { rateLimiter } from "@/lib/rateLimiter";
 import { chatTemplate, translationTemplate } from "@/lib/templates/chat-templates";
 import { SendMessageValidator } from "@/lib/validators/SendMessageValidator";
 import { currentUser } from "@clerk/nextjs/server";
@@ -9,7 +10,7 @@ import { RunnablePassthrough, RunnableSequence } from "@langchain/core/runnables
 import { ChatMistralAI } from "@langchain/mistralai";
 import { PineconeStore } from "@langchain/pinecone";
 import { StreamingTextResponse } from "ai";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 60;
 
@@ -20,7 +21,7 @@ const llm = new ChatMistralAI({
 	temperature: 0.3,
 });
 
-export const POST = async (req: NextRequest) => {
+export const POST = async (req: NextRequest, res: NextResponse) => {
 	const body = await req.json();
 	// const llm = new ChatGoogleGenerativeAI({
 	// 	model: "gemini-1.5-flash",
@@ -32,6 +33,11 @@ export const POST = async (req: NextRequest) => {
 	const user = await currentUser();
 
 	if (!user) return new Response("Unauthorized", { status: 401 });
+
+	const { success, remaining } = await rateLimiter.limit(user.id);
+	if (!success) {
+		return new Response("Rate limit exceeded please try again later", { status: 429 });
+	}
 
 	const { fileId, message, language } = SendMessageValidator.parse(body);
 

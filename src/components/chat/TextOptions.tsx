@@ -30,19 +30,28 @@ export default function TextOptions({ text, id, onUpdateMessage, onLoadingStateC
 				body: JSON.stringify({ text, option, id }),
 			});
 
-			if (!response.ok) throw new Error("Request failed");
-
-			const result = await response.json();
-
-			onUpdateMessage({
+			if (!response.ok) {
+				// Parse the error response JSON
+				const errorData = await response.json();
+				
+				// Throw an error with the extracted error message
+				throw new Error(
+				  errorData.error || `Error ${response.status}`
+				);
+			  }
+			
+			  const result = await response.json();
+			
+			  onUpdateMessage({
 				type,
 				content: result.content,
-			});
-		} catch (error) {
-			toast.error(`There was an error while ${type}ing this text`, {
-				description: "Please try again later",
+			  });
+		} catch (error: any) {
+			// Display the error message in a toast
+			toast.error("Request failed", {
+				description: error.message || "Please try again later",
 				duration: 5000,
-			});
+			  });
 		} finally {
 			onLoadingStateChange({ [type]: false });
 		}

@@ -35,12 +35,18 @@ const ChatInput = ({ isDisabled, file }: ChatInputProps) => {
 						duration: 1500,
 					});
 				}
-			} catch (error) {
-				console.error("Error fetching related PDFs:", error);
+				if (!response.success) {
+					toast.error(response.error, {
+						duration: 3000,
+					});
+				}
+			} catch (error: any) {
 				toast.dismiss(loadingToast);
-				toast.error("Failed to update related PDFs", {
-					duration: 1500,
+				toast.error(error.message, {
+					duration: 3000,
 				});
+			} finally {
+				toast.dismiss(loadingToast);
 			}
 		});
 	};

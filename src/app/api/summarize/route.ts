@@ -5,10 +5,30 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatMistralAI } from "@langchain/mistralai";
 import { NextRequest, NextResponse } from "next/server";
+import { currentUser } from "@clerk/nextjs/server";
+import { rateLimiter } from "@/lib/rateLimiter";
 
 export const POST = async (req: NextRequest) => {
 	const body = await req.json();
 	const { text, option, id } = summarizeCheck.parse(body);
+	const user = await currentUser();
+
+	if (!user) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
+
+	const { success, remaining } = await rateLimiter.limit(user.id);
+
+	if (!success) {
+		return NextResponse.json(
+			{
+				error: `Rate limit exceeded. Please try again later. You have ${remaining} requests left.`,
+			},
+			{
+				status: 429,
+			},
+		);
+	}
 
 	const llm = new ChatMistralAI({
 		model: "mistral-large-latest",

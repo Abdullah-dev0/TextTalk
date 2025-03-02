@@ -58,6 +58,12 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 				}),
 			});
 
+			// Check if response is not ok (non-200 status)
+			if (!response.ok) {
+				// Throw an error with the status and message from the backend
+				throw new Error(response.status.toString());
+			}
+
 			return response.body;
 		},
 		onMutate: async ({ message }) => {
@@ -182,10 +188,17 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 		},
 
 		onError: (error: any, __, context) => {
-			console.log(error);
-			toast.error(error.message, {
-				description: "There was an error sending the message",
-			});
+			if (error.message == "429") {
+				toast.error("Rate Limit Exceeded", {
+					description: "Please wait before sending more messages",
+					duration: 5000,
+				});
+			} else {
+				toast.error("Failed to send message", {
+					description: "There was an error sending the message",
+				});
+			}
+
 			setMessage(backupMessage.current);
 			utils.getFileMessages.setData({ fileId }, { messages: context?.previousMessages ?? [] });
 		},

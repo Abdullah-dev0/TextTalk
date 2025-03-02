@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/db";
+import { rateLimiter } from "@/lib/rateLimiter";
 import { getRelatedWords } from "@/lib/templates/chat-templates";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { StringOutputParser } from "@langchain/core/output_parsers";
@@ -8,6 +9,7 @@ import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatMistralAI } from "@langchain/mistralai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { File } from "@prisma/client";
+import { currentUser } from "@clerk/nextjs/server";
 
 type ErrorResponse = {
 	success: false;
@@ -22,6 +24,23 @@ type SuccessResponse = {
 };
 
 export const relatedPdf = async (file: File): Promise<ErrorResponse | SuccessResponse> => {
+	const user = await currentUser();
+
+	if (!user)
+		return {
+			success: false,
+			error: "Unauthorized",
+		};
+
+	const { success, remaining } = await rateLimiter.limit(user.id);
+
+	if (!success) {
+		return {
+			success: false,
+			error: `Rate limit exceeded. Please try again later. You have ${remaining} requests left.`,
+		};
+	}
+
 	try {
 		// Fetch PDF
 		const response = await fetch(file.url);

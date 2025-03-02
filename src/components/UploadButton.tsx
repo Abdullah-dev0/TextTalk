@@ -40,9 +40,16 @@ const UploadDropzone = ({ dialogTriggerRef }: { dialogTriggerRef: RefObject<HTML
 	return (
 		<>
 			{isUploadComplete ? (
-				<p className="min-h-[400px] w-full grid place-content-center text-2xl font-medium font-mono">
-					Processing your PDF...⚡
-				</p>
+				<div className="min-h-[400px] w-full flex flex-col items-center justify-center space-y-4 p-6">
+					<div className="relative w-16 h-16">
+						<div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+						<div className="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+					</div>
+					<h3 className="text-2xl font-semibold text-gray-800">Processing your PDF</h3>
+					<p className="text-gray-500 text-center max-w-md">
+						This may take a moment depending on the file size. Please don't close this window.
+					</p>
+				</div>
 			) : (
 				// @ts-ignore
 				<Drop
@@ -56,7 +63,8 @@ const UploadDropzone = ({ dialogTriggerRef }: { dialogTriggerRef: RefObject<HTML
 					}}
 					onUploadError={(error: Error) => {
 						toast.error(`${error.message}`, {
-							description: "The uploaded file exceeds the maximum allowed size. Please reduce the file size and try again.",
+							description:
+								"The uploaded file exceeds the maximum allowed size. Please reduce the file size and try again.",
 							duration: 9000,
 						});
 					}}
